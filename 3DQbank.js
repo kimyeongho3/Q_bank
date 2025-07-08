@@ -31,9 +31,9 @@ function showQuestion() {
 
     // 이벤트 리스너로 버튼 클릭 처리
     document.querySelectorAll('.choice-btn').forEach(btn => {
-        btn.onclick = function() {
+        btn.addEventListener('click', function() {
             checkAnswer(Number(this.getAttribute('data-idx')));
-        };
+        });
     });
 }
 
@@ -49,8 +49,8 @@ function checkAnswer(choice) {
         result.style.color = "#ef4444";
     }
     // 해설 표시
-    explanation.textContent = q.explanation || "";
     explanation.style.display = "block";
+    explanation.innerText = q.explanation || "";
     // 모든 선택 버튼 비활성화
     document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
     document.getElementById('next-btn').style.display = 'inline-block';
