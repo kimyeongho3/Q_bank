@@ -22,15 +22,22 @@ function showQuestion() {
     container.innerHTML = `
         <p><b>Q${current + 1}.</b> ${q.question}</p>
         ${q.choices.map((c, i) => `
-            <button onclick="checkAnswer(${i})">${c}</button>
+            <button class="choice-btn" data-idx="${i}">${c}</button>
         `).join('')}
         <div id="result"></div>
         <div id="explanation" style="display:none; margin-top:1rem; color:#64748b;"></div>
     `;
     document.getElementById('next-btn').style.display = 'none';
+
+    // 이벤트 리스너로 버튼 클릭 처리
+    document.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.onclick = function() {
+            checkAnswer(Number(this.getAttribute('data-idx')));
+        };
+    });
 }
 
-window.checkAnswer = function(choice) {
+function checkAnswer(choice) {
     const q = questions[current];
     const result = document.getElementById('result');
     const explanation = document.getElementById('explanation');
@@ -45,9 +52,9 @@ window.checkAnswer = function(choice) {
     explanation.textContent = q.explanation || "";
     explanation.style.display = "block";
     // 모든 선택 버튼 비활성화
-    Array.from(document.querySelectorAll('#quiz-container button')).forEach(btn => btn.disabled = true);
+    document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
     document.getElementById('next-btn').style.display = 'inline-block';
-};
+}
 
 document.getElementById('next-btn').onclick = function() {
     current++;
