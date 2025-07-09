@@ -2,30 +2,145 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>3D 기출문제 퀴즈</title>
+    <title>컴퓨터개론 기출문제 퀴즈</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; margin: 0; padding: 0; }
-        #main { max-width: 500px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 2rem; }
+        #main { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 2rem; }
         h1 { text-align: center; color: #2563eb; }
-        .choice-btn { 
-            display: block; width: 100%; margin: 0.5rem 0; padding: 0.7rem; 
-            border: 1px solid #d1d5db; border-radius: 6px; background: #f1f5f9; 
-            font-size: 1rem; cursor: pointer; transition: background 0.2s;
+        #answer-input { width: 100%; padding: 0.7rem; font-size: 1rem; border-radius: 6px; border: 1px solid #d1d5db; margin-top: 1rem; }
+        #submit-btn, #next-btn {
+            margin-top: 1rem; padding: 0.7rem 2rem; background: #2563eb; color: #fff;
+            border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
         }
-        .choice-btn:disabled { background: #e5e7eb; color: #a1a1aa; cursor: default; }
-        #next-btn { 
-            display: none; margin: 1.5rem auto 0 auto; padding: 0.7rem 2rem; 
-            background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
-        }
+        #next-btn { display: none; }
         #result { font-weight: bold; margin-top: 1rem; }
     </style>
 </head>
 <body>
     <div id="main">
-        <h1>3D 기출문제 퀴즈</h1>
+        <h1>컴퓨터개론 기출문제 퀴즈</h1>
         <div id="quiz-container"></div>
+        <button id="submit-btn">정답 제출</button>
         <button id="next-btn">다음 문제</button>
     </div>
-    <script src="3DQbank.js"></script>
+    <script>
+        // 문제 데이터 (번호 자동 부여)
+        const questions = [
+            { question: "'문제를 해결하는 절차'를 컴퓨터가 처리할 수 있도록 표현한 형식은?", answer: "알고리즘" },
+            { question: "프로그램을 컴퓨터가 처리할 수 있는 형식으로 인코딩하여 컴퓨터 안에 저장하는 과정은?", answer: "컴파일" },
+            { question: "WWW에서 두번째 W는 무엇의 약자인가?", answer: "Web" },
+            { question: "아폴로 11호에 사용된 컴퓨터가 중국산USB보다 성능이 좋다?", answer: "아니오" },
+            { question: "개체의 외적 구성과 내적 속성의 세부사항을 구별하여, 복잡한 시스템을 설계하고 제작할 수 있게 해주는 개념은?", answer: "추상화" },
+            { question: "전세계 컴퓨터들과 전자장치를 연결한 것은?", answer: "인터넷" },
+            { question: "프로그래밍 오류 중에서 '프로그램이 실행되는 동안 발생하는 오류'는?", answer: "런타임 오류" },
+            { question: "'우리가 어떤 문제를 해결하기 위해 고안한 방법 '을 가리키는 단어는?", answer: "알고리즘" },
+            { question: "인터넷에 연결된 컴퓨터를 통해 정보를 공유하는 공간으로, 1990년 팀 버너스-리가 만든 것은?", answer: "월드와이드웹" },
+            { question: "입력값 중 하나만 1인 경우에 1을 출력하는 부울 연산은?", answer: "XOR" },
+            { question: "'부울 연산을 계산하는 (논리적/물리적) 장치'를 무엇이라고 하나요? (단, 한글로)", answer: "논리 회로" },
+            { question: "'임의의 순서로 셀 영역에 접근할 수 있는 메모리'를 가리키는 용어는?", answer: "RAM" },
+            { question: "DRAM에서 D가 의미하는 것은?", answer: "Dynamic" },
+            { question: "'1킬로바이트'는 몇 바이트인가요?", answer: "1024 바이트" },
+            { question: "세계 각국 언어에서 사용되는 주요 기호들을 표현할 수 있는 방법은?", answer: "유니 코드" },
+            { question: "빛의 3원색인 적, 녹, 청으로 이미지를 표현하는 방법은?", answer: "RGB" },
+            { question: "기하학적 구조(직선, 곡선)로 이미지를 표현하는 기법은?", answer: "백터 그래픽" },
+            { question: "일정 간격으로 아날로그 데이터를 추출하여 디지털로 기록하는 기법은?", answer: "샘플링" },
+            { question: "파이썬에서 변수 이름을 잘 못 적었을 때 발생하는 오류는?", answer: "NameError" },
+            { question: "압축 기법 중, 해당 항목의 ‘사용 빈도’ 역순으로 비트 패턴 길이를 설정하는 방법은?", answer: "허프만 코딩" },
+            { question: "각 비트 패턴의 1의 개수를 고정하여 통신오류를 체크하는 방법은?", answer: "패리티 검사" },
+            { question: "오류 정정 코드는 언제든지 원래 패턴으로 복구 가능하다?", answer: "X" },
+            { question: "연산 명령 중에서 '부호비트의 변경이 없는' 자리 이동은?", answer: "논리적 이동" },
+            { question: "'컴퓨터와 주변장치 간 데이터 전송을 조정하는 과정'을 가리키는 용어는?", answer: "인터페이스" },
+            { question: "'빠른 전송 속도'를 제공하는 통신 매체는?", answer: "광케이블" },
+            { question: "'복잡한 통신 경로'를 가지는 통신 매체는?", answer: "무선" },
+            { question: "1 Kbps(Kilo-bps)는 몇 bps 인가요?", answer: "1000bps" },
+            { question: "비트 단위 연산자 중에서 OR 연산자는?", answer: "l" },
+            { question: "값을 반환하지 않는 함수 앞에 사용하는 키워드는?", answer: "void" },
+            { question: "CPU와 메모리가 아무리 빨라져도, 작업 처리 방식에 따라서 비효율이 발생하는 현상은?", answer: "병목 현상" },
+            { question: "다음 중 성능이 뛰어난 사물인터넷 용 컴퓨터는?", answer: "라즈베리파이" },
+            { question: "병렬연산에 최적화 된 처리 장치는?", answer: "GPU" },
+            { question: "컴퓨터 구조에서 다음의 장치는?", answer: "레지스터" },
+            { question: "다음 기계어 타입은?", answer: "즉시 주소 방식" },
+            { question: "다음 중 기계 명령의 종류가 아닌 것은?", answer: "제어 명령어" },
+            { question: "기계 주기의 3단계는?", answer: "인출 해독 실행" },
+            { question: "기계어 처리율의 개선을 위한 다음 기술은?", answer: "파이프라인" },
+            { question: "'10110011'을 오른쪽으로 '산술적' 자리 이동을 한 경우, 결과값은?", answer: "11101100" },
+            { question: "'10110011'을 왼쪽으로 '회전식' 자리 이동을 한 경우, 결과값은?", answer: "01100111" },
+            { question: "운영체제의 구성요소 중 다음에 해당하는 것은?", answer: "파일시스템" },
+            { question: "데스크톱 운영체제 중에서 점유율이 가장 높은 것은?", answer: "window" },
+            { question: "스마트폰 운영체제 중에서 점유율이 가장 높은 것은?", answer: "안드로이드" },
+            { question: "컴퓨터의 전반적인 운영을 제어하는 소프트웨어?", answer: "운영체제" },
+            { question: "주기억장치와 대용량 저장장치 사이에서 데이터 블록을 이동하여 만들어진 ‘가상적인’ 큰 기억공간은?", answer: "가상 메모리" },
+            { question: "공유 자원에 대해 여러 개의 프로세스가 동시에 접근을 시도하는 경우를 의미하는 용어는?", answer: "경쟁 상태" },
+            { question: "네트워크의 분류 중에서 'LAN'으로 불리며, 건물이나 캠퍼스 범위를 가지는 통신망은?", answer: "근거리 통신망" },
+            { question: "네트워크 상에서 컴퓨터들이 연결되는 패턴을 의미하는 것은?", answer: "토폴로지" },
+            { question: "네트워크 상에서 활동을 수행하기 위한 규칙으로, 서로 호환되는 네트워크 응용 제품에 반드시 맞춰야 하는 것은?", answer: "프로토콜" },
+            { question: "네트워크 연결 장비 중에서, 호환되지 않는 네트워크들을 연결하여 인터네트워크를 구성하는 것은?", answer: "게이트웨이" },
+            { question: "프로세스 간 통신 방법 중에서, 두 개의 프로세스가 동등한 자격으로 통신하고 필요할 때만 일시적으로 실행하는 모델은?", answer: "피어투 피어 모델" },
+            { question: "분산시스템의 최신 유형으로, 방대한 컴퓨터 자원을 제공하지만 세부사항은 숨기는 컴퓨팅 방식은?", answer: "클라우드 컴퓨팅" },
+            { question: "전 세계를 연결하는 인터네트워크로, 국지적 재난에도 불통 상태에 이르지 않을 네트워크 연결 수단을 목표로 개발된 것은?", answer: "인터넷" },
+            { question: "기존 인터넷 주소 체계를 개선한 것으로, 128비트 주소 크기를 가지며 품질/보안/모바일/웹캐스팅에서 향상된 기능을 제공하는 것은?", answer: "IPv6" },
+            { question: "인터넷 주소 체계를 IP 주소로 변환해주는 네임 서버들로 구성된 시스템은?", answer: "DNS" },
+            { question: "하이퍼텍스트(hypertext)라는 링크 연결 문서 개념을 인터네트워크 기술에 결합한 것은?", answer: "WWW" },
+            { question: "월드와이드웹에서 특정 문서를 가리키는 주소는?", answer: "URL" },
+            { question: "HTML 파일에서 다른 문서나 내용에 대한 하이퍼링크를 추가하는 태그는?", answer: "<a>" },
+            { question: "메시지 전송을 위한 다음 프로토콜은?", answer: "TCP / IP" },
+            { question: "인터넷 소프트웨어 계층 중 다음에 해당하는 계층은?", answer: "네트워크 계층" },
+            { question: "전송 계층에서 다음에 해당하는 프로토콜은?", answer: "TCP" },
+            { question: "서버/클라이언트 프로그래밍에서 프로세스들의 연결을 처리하는 추상화 요소로, 전송 계층을 통해 네트워크상의 다른 프로세스와 연결을 형성하는 것은?", answer: "소켓" },
+            { question: "사이버보안에서 다음을 의미하는 용어는?", answer: "피싱" }
+        ];
+
+        let current = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+
+        function showQuestion() {
+            const q = questions[current];
+            document.getElementById('quiz-container').innerHTML = `
+                <p><b>Q${current + 1}.</b> ${q.question}</p>
+                <input id="answer-input" type="text" autocomplete="off" />
+                <div id="result"></div>
+            `;
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('answer-input').focus();
+        }
+
+        function checkAnswer() {
+            const q = questions[current];
+            const user = document.getElementById('answer-input').value.trim();
+            const result = document.getElementById('result');
+            if (user.replace(/\s/g, '').toLowerCase() === q.answer.replace(/\s/g, '').toLowerCase()) {
+                result.textContent = "정답입니다!";
+                result.style.color = "#10b981";
+                correctCount++;
+            } else {
+                result.innerHTML = `오답입니다.<br>정답: <b>${q.answer}</b>`;
+                result.style.color = "#ef4444";
+                wrongCount++;
+            }
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        document.getElementById('submit-btn').onclick = checkAnswer;
+        document.getElementById('next-btn').onclick = function() {
+            current++;
+            if (current < questions.length) {
+                showQuestion();
+            } else {
+                const total = questions.length;
+                const percent = Math.round((correctCount / total) * 100);
+                document.getElementById('quiz-container').innerHTML = `
+                    <p>모든 문제를 풀었습니다!</p>
+                    <p>정답: <b style="color:#10b981">${correctCount}</b>개 / 오답: <b style="color:#ef4444">${wrongCount}</b>개</p>
+                    <p>정답률: <b>${percent}%</b></p>
+                `;
+                document.getElementById('next-btn').style.display = 'none';
+            }
+        };
+
+        window.onload = showQuestion;
+    </script>
 </body>
 </html>
