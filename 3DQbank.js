@@ -421,6 +421,8 @@ const questions = [
 ];
 
 let current = 0;
+let correctCount = 0;
+let wrongCount = 0;
 
 function showQuestion() {
     const q = questions[current];
@@ -435,7 +437,6 @@ function showQuestion() {
     `;
     document.getElementById('next-btn').style.display = 'none';
 
-    // 이벤트 리스너로 버튼 클릭 처리
     document.querySelectorAll('.choice-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             checkAnswer(Number(this.getAttribute('data-idx')));
@@ -450,14 +451,14 @@ function checkAnswer(choice) {
     if (choice === q.answer) {
         result.textContent = "정답입니다!";
         result.style.color = "#10b981";
+        correctCount++;
     } else {
-        result.textContent = "오답입니다.";
+        result.innerHTML = `오답입니다.<br>정답: <b>${q.choices[q.answer]}</b>`;
         result.style.color = "#ef4444";
+        wrongCount++;
     }
-    // 해설 표시
     explanation.style.display = "block";
     explanation.innerText = q.explanation || "";
-    // 모든 선택 버튼 비활성화
     document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
     document.getElementById('next-btn').style.display = 'inline-block';
 }
@@ -467,7 +468,13 @@ document.getElementById('next-btn').onclick = function() {
     if (current < questions.length) {
         showQuestion();
     } else {
-        document.getElementById('quiz-container').innerHTML = "<p>모든 문제를 풀었습니다!</p>";
+        const total = questions.length;
+        const percent = Math.round((correctCount / total) * 100);
+        document.getElementById('quiz-container').innerHTML = `
+            <p>모든 문제를 풀었습니다!</p>
+            <p>정답: <b style="color:#10b981">${correctCount}</b>개 / 오답: <b style="color:#ef4444">${wrongCount}</b>개</p>
+            <p>정답률: <b>${percent}%</b></p>
+        `;
         this.style.display = 'none';
     }
 };
