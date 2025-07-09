@@ -18,6 +18,7 @@
             background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;
         }
         #result { font-weight: bold; margin-top: 1rem; }
+        #summary { margin-top: 2rem; font-size: 1.1rem; text-align: center; }
     </style>
 </head>
 <body>
@@ -25,6 +26,7 @@
         <h1>3D 기출문제 퀴즈</h1>
         <div id="quiz-container"></div>
         <button id="next-btn">다음 문제</button>
+        <div id="summary"></div>
     </div>
     <script>
         // 3D.txt 기반 객관식 문제
@@ -313,6 +315,8 @@
         ];
 
         let current = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
 
         function showQuestion() {
             const q = questions[current];
@@ -341,9 +345,11 @@
             if (choice === q.answer) {
                 result.textContent = "정답입니다!";
                 result.style.color = "#10b981";
+                correctCount++;
             } else {
-                result.textContent = "오답입니다.";
+                result.innerHTML = `오답입니다. <br>정답: <b>${q.choices[q.answer]}</b>`;
                 result.style.color = "#ef4444";
+                wrongCount++;
             }
             explanation.style.display = "block";
             explanation.innerText = q.explanation || "";
@@ -358,8 +364,18 @@
             } else {
                 document.getElementById('quiz-container').innerHTML = "<p>모든 문제를 풀었습니다!</p>";
                 this.style.display = 'none';
+                showSummary();
             }
         };
+
+        function showSummary() {
+            const summary = document.getElementById('summary');
+            summary.innerHTML = `
+                <b>총 ${questions.length}문제 중</b><br>
+                <span style="color:#10b981">정답: ${correctCount}개</span> /
+                <span style="color:#ef4444">오답: ${wrongCount}개</span>
+            `;
+        }
 
         window.onload = showQuestion;
     </script>
